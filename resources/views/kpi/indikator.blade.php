@@ -1,0 +1,197 @@
+@extends('layouts.app')
+@section('title','Indikator KPI')
+@section('page-title','Indikator KPI')
+
+@section('content')
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <p class="text-muted mb-0" style="font-size:13px">Kelola indikator KPI beserta target dan bobot penilaian.</p>
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#mdlTambah">
+    <i class="bi bi-plus-lg me-1"></i>Tambah Indikator
+  </button>
+</div>
+
+@php $grouped = $indikators->groupBy(fn($i) => $i->kategori->nama); @endphp
+
+@foreach($grouped as $namaKat => $inds)
+@php $kat = $inds->first()->kategori; @endphp
+<div class="card mb-4">
+  <div class="card-header d-flex align-items-center gap-2" style="border-left:4px solid {{ $kat->warna }}">
+    <span style="font-weight:700;color:{{ $kat->warna }}">{{ $namaKat }}</span>
+    <span style="font-size:11px;color:#64748B">— Total bobot: <strong>{{ $inds->sum('bobot') }}%</strong></span>
+  </div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead>
+        <tr><th>Kode</th><th>Nama Indikator</th><th>Satuan</th><th class="text-end">Target</th><th class="text-center">Bobot</th><th class="text-center">Arah</th><th class="text-center">Periode</th><th class="text-center">Aksi</th></tr>
+      </thead>
+      <tbody>
+        @foreach($inds as $ind)
+        <tr>
+          <td><code style="font-size:10px;background:#F1F5F9;padding:2px 6px;border-radius:4px">{{ $ind->kode }}</code></td>
+          <td style="font-size:13px;font-weight:500;max-width:240px">{{ $ind->nama }}</td>
+          <td><span style="background:#EFF6FF;color:#1E40AF;padding:2px 8px;border-radius:10px;font-size:11px">{{ $ind->satuan }}</span></td>
+          <td class="text-end" style="font-weight:600">{{ number_format($ind->target,2) }}</td>
+          <td class="text-center"><span class="badge bg-primary">{{ $ind->bobot }}%</span></td>
+          <td class="text-center">
+            @if($ind->arah=='naik')
+              <span style="color:#059669;font-size:12px;font-weight:600">⬆ Naik</span>
+            @else
+              <span style="color:#DC2626;font-size:12px;font-weight:600">⬇ Turun</span>
+            @endif
+          </td>
+          <td class="text-center"><span style="background:#F1F5F9;color:#64748B;padding:2px 8px;border-radius:10px;font-size:11px">{{ ucfirst($ind->periode) }}</span></td>
+          <td class="text-center">
+            <button class="btn btn-sm btn-outline-primary me-1"
+              data-bs-toggle="modal" data-bs-target="#mdlEdit"
+              data-id="{{ $ind->id }}" data-nama="{{ $ind->nama }}"
+              data-target="{{ $ind->target }}" data-bobot="{{ $ind->bobot }}"
+              data-arah="{{ $ind->arah }}" data-satuan="{{ $ind->satuan }}"
+              data-periode="{{ $ind->periode }}">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <form action="{{ route('indikator.destroy',$ind->id) }}" method="POST" class="d-inline"
+              onsubmit="return confirm('Hapus indikator ini? Semua data realisasi terkait akan ikut terhapus.')">
+              @csrf @method('DELETE')
+              <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        @endforeach
+      </tbody>
+    </table>
+  </div>
+</div>
+@endforeach
+
+{{-- Modal Tambah --}}
+<div class="modal fade" id="mdlTambah" tabindex="-1">
+  <div class="modal-dialog modal-lg"><div class="modal-content" style="border-radius:14px;border:none">
+    <div class="modal-header" style="background:linear-gradient(135deg,#003B93,#0052CC);color:#fff;border-radius:14px 14px 0 0">
+      <h5 class="modal-title fw-bold"><i class="bi bi-plus-circle me-2"></i>Tambah Indikator KPI</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <form action="{{ route('indikator.store') }}" method="POST">
+      @csrf
+      <div class="modal-body p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold" style="font-size:11px">KATEGORI <span class="text-danger">*</span></label>
+            <select name="kategori_id" class="form-select" required>
+              <option value="">-- Pilih --</option>
+              @foreach($kategoris as $k)
+              <option value="{{ $k->id }}">{{ $k->nama }}</option>
+              @endforeach
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold" style="font-size:11px">KODE <span class="text-danger">*</span></label>
+            <input type="text" name="kode" class="form-control" required placeholder="KS-004" maxlength="20">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold" style="font-size:11px">NAMA INDIKATOR <span class="text-danger">*</span></label>
+            <input type="text" name="nama" class="form-control" required placeholder="Nama lengkap indikator KPI">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:11px">SATUAN <span class="text-danger">*</span></label>
+            <input type="text" name="satuan" class="form-control" required placeholder="%, kWh, jam ...">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:11px">TARGET <span class="text-danger">*</span></label>
+            <input type="number" name="target" class="form-control" step="0.01" min="0" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:11px">BOBOT (%) <span class="text-danger">*</span></label>
+            <input type="number" name="bobot" class="form-control" step="0.5" min="0" max="100" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold" style="font-size:11px">ARAH TARGET <span class="text-danger">*</span></label>
+            <select name="arah" class="form-select" required>
+              <option value="naik">⬆ Naik (semakin naik semakin baik)</option>
+              <option value="turun">⬇ Turun (semakin turun semakin baik)</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold" style="font-size:11px">PERIODE</label>
+            <select name="periode" class="form-select">
+              <option value="bulanan">Bulanan</option>
+              <option value="triwulan">Triwulan</option>
+              <option value="tahunan">Tahunan</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-save me-1"></i>Simpan Indikator</button>
+      </div>
+    </form>
+  </div></div>
+</div>
+
+{{-- Modal Edit --}}
+<div class="modal fade" id="mdlEdit" tabindex="-1">
+  <div class="modal-dialog"><div class="modal-content" style="border-radius:14px;border:none">
+    <div class="modal-header" style="background:linear-gradient(135deg,#059669,#065F46);color:#fff;border-radius:14px 14px 0 0">
+      <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Edit Indikator KPI</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+    </div>
+    <form id="fmEdit" method="POST">
+      @csrf @method('PUT')
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label fw-bold" style="font-size:11px">NAMA INDIKATOR</label>
+          <input type="text" name="nama" id="en" class="form-control" required>
+        </div>
+        <div class="row g-3">
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:11px">SATUAN</label>
+            <input type="text" name="satuan" id="es" class="form-control" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:11px">TARGET</label>
+            <input type="number" name="target" id="et" class="form-control" step="0.01" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold" style="font-size:11px">BOBOT (%)</label>
+            <input type="number" name="bobot" id="eb" class="form-control" step="0.5" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold" style="font-size:11px">ARAH</label>
+            <select name="arah" id="ea" class="form-select">
+              <option value="naik">⬆ Naik</option>
+              <option value="turun">⬇ Turun</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold" style="font-size:11px">PERIODE</label>
+            <select name="periode" id="ep" class="form-select">
+              <option value="bulanan">Bulanan</option>
+              <option value="triwulan">Triwulan</option>
+              <option value="tahunan">Tahunan</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" class="btn btn-success btn-sm"><i class="bi bi-save me-1"></i>Simpan</button>
+      </div>
+    </form>
+  </div></div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+document.getElementById('mdlEdit').addEventListener('show.bs.modal',function(e){
+  const b=e.relatedTarget;
+  document.getElementById('fmEdit').action='/indikator/'+b.dataset.id;
+  document.getElementById('en').value=b.dataset.nama;
+  document.getElementById('es').value=b.dataset.satuan;
+  document.getElementById('et').value=b.dataset.target;
+  document.getElementById('eb').value=b.dataset.bobot;
+  document.getElementById('ea').value=b.dataset.arah;
+  document.getElementById('ep').value=b.dataset.periode;
+});
+</script>
+@endpush
