@@ -2,19 +2,29 @@
 namespace App\Http\Controllers;
 use App\Models\{Kategori, Realisasi, Ulp, RealisasiUlp};
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class MonitoringController extends Controller {
     public function index(Request $request) {
+        $user  = Auth::user();
         $bulan = (int)($request->bulan ?? 1);
         $tahun = (int)($request->tahun ?? 2026);
-        $ulps  = Ulp::where('is_active',true)->get();
+
+        // BUG 3 FIX: admin_ulp hanya boleh lihat ULP-nya sendiri
+        $ulps = $user->isAdminUlp()
+            ? Ulp::where('id', $user->ulp_id)->where('is_active', true)->get()
+            : Ulp::where('is_active', true)->get();
+
         return view('monitoring.index', compact('bulan','tahun','ulps'));
     }
 
     public function data(Request $request) {
-        $bulan   = (int)($request->bulan ?? 1);
-        $tahun   = (int)($request->tahun ?? 2026);
-        $ulpId   = $request->ulp_id; // null = UP3, angka = ULP tertentu
+        $user  = Auth::user();
+        $bulan = (int)($request->bulan ?? 1);
+        $tahun = (int)($request->tahun ?? 2026);
+
+        // BUG 3 FIX: admin_ulp paksa pakai ulp_id miliknya sendiri, abaikan request
+        $ulpId = $user->isAdminUlp() ? $user->ulp_id : $request->ulp_id;
 
         if ($ulpId) {
             // Data per ULP

@@ -21,49 +21,59 @@ Route::post('/logout', [AuthController::class,'logout'])->name('logout')->middle
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class,'index'])->name('dashboard');
 
-    // Admin only
-    Route::middleware('role:admin')->group(function () {
+    // ── Admin UP3 only ──────────────────────────────────────────
+    Route::middleware('role:admin_up3')->group(function () {
+        // Kelola Master KPI
         Route::get('/kpi',             [KpiController::class,'index'])->name('kpi.index');
         Route::post('/kpi',            [KpiController::class,'store'])->name('kpi.store');
         Route::put('/kpi/{id}',        [KpiController::class,'update'])->name('kpi.update');
         Route::delete('/kpi/{id}',     [KpiController::class,'destroy'])->name('kpi.destroy');
 
+        // Kelola ULP
         Route::get('/ulp',             [UlpController::class,'index'])->name('ulp.index');
         Route::post('/ulp',            [UlpController::class,'store'])->name('ulp.store');
         Route::put('/ulp/{id}',        [UlpController::class,'update'])->name('ulp.update');
         Route::delete('/ulp/{id}',     [UlpController::class,'destroy'])->name('ulp.destroy');
 
-        Route::get('/validasi',                  [RealisasiController::class,'validasiIndex'])->name('validasi.index');
-        Route::patch('/validasi/{id}/approve',   [RealisasiController::class,'approve'])->name('validasi.approve');
-        Route::patch('/validasi/{id}/reject',    [RealisasiController::class,'reject'])->name('validasi.reject');
+        // Validasi KPI UP3
+        Route::get('/validasi',                [RealisasiController::class,'validasiIndex'])->name('validasi.index');
+        Route::patch('/validasi/{id}/approve', [RealisasiController::class,'approve'])->name('validasi.approve');
+        Route::patch('/validasi/{id}/reject',  [RealisasiController::class,'reject'])->name('validasi.reject');
 
-        Route::get('/pengguna',         [PenggunaController::class,'index'])->name('pengguna.index');
-        Route::post('/pengguna',        [PenggunaController::class,'store'])->name('pengguna.store');
-        Route::put('/pengguna/{id}',    [PenggunaController::class,'update'])->name('pengguna.update');
-        Route::delete('/pengguna/{id}', [PenggunaController::class,'destroy'])->name('pengguna.destroy');
+        // Kelola Pengguna
+        Route::get('/pengguna',          [PenggunaController::class,'index'])->name('pengguna.index');
+        Route::post('/pengguna',         [PenggunaController::class,'store'])->name('pengguna.store');
+        Route::put('/pengguna/{id}',     [PenggunaController::class,'update'])->name('pengguna.update');
+        Route::delete('/pengguna/{id}',  [PenggunaController::class,'destroy'])->name('pengguna.destroy');
         Route::patch('/pengguna/{id}/toggle', [PenggunaController::class,'toggle'])->name('pengguna.toggle');
+
+        // Evaluasi & Laporan lengkap (admin_up3)
+        Route::post('/evaluasi/generate', [EvaluasiController::class,'generate'])->name('evaluasi.generate');
+
+        // Laporan — hanya admin_up3
+        Route::get('/laporan',       [LaporanController::class,'index'])->name('laporan.index');
+        Route::get('/laporan/pdf',   [LaporanController::class,'pdf'])->name('laporan.pdf');
+        Route::get('/laporan/excel', [LaporanController::class,'excel'])->name('laporan.excel');
     });
 
-    // Semua role
-    Route::get('/input',         [RealisasiController::class,'index'])->name('input.index');
-    Route::post('/input',        [RealisasiController::class,'store'])->name('input.store');
-    Route::delete('/input/{id}', [RealisasiController::class,'destroy'])->name('input.destroy');
+    // ── Admin UP3 + Admin ULP: input KPI (controller handle masing-masing) ──
+    Route::middleware('role:admin_up3,admin_ulp')->group(function () {
+        Route::get('/input',         [RealisasiController::class,'index'])->name('input.index');
+        Route::post('/input',        [RealisasiController::class,'store'])->name('input.store');
+        Route::put('/input/{id}',    [RealisasiController::class,'update'])->name('input.update');
+        Route::delete('/input/{id}', [RealisasiController::class,'destroy'])->name('input.destroy');
+    });
 
-    Route::get('/monitoring',       [MonitoringController::class,'index'])->name('monitoring.index');
-    Route::get('/monitoring/data',  [MonitoringController::class,'data'])->name('monitoring.data');
+    // ── Semua role (view only) ──────────────────────────────────
+    Route::get('/monitoring',      [MonitoringController::class,'index'])->name('monitoring.index');
+    Route::get('/monitoring/data', [MonitoringController::class,'data'])->name('monitoring.data');
 
-    Route::get('/evaluasi',               [EvaluasiController::class,'index'])->name('evaluasi.index');
-    Route::post('/evaluasi/generate',     [EvaluasiController::class,'generate'])->name('evaluasi.generate');
-    Route::get('/evaluasi/{bulan}/{tahun}',[EvaluasiController::class,'detail'])->name('evaluasi.detail');
+    Route::get('/evaluasi',                    [EvaluasiController::class,'index'])->name('evaluasi.index');
+    Route::get('/evaluasi/{bulan}/{tahun}',    [EvaluasiController::class,'detail'])->name('evaluasi.detail');
 
-    Route::get('/laporan',       [LaporanController::class,'index'])->name('laporan.index');
-    Route::get('/laporan/pdf',   [LaporanController::class,'pdf'])->name('laporan.pdf');
-    Route::get('/laporan/excel', [LaporanController::class,'excel'])->name('laporan.excel');
+    Route::get('/profil',           [PenggunaController::class,'profil'])->name('profil');
+    Route::post('/profil/update',   [PenggunaController::class,'updateProfil'])->name('profil.update');
+    Route::post('/profil/password', [PenggunaController::class,'gantiPassword'])->name('profil.password');
 
-    Route::get('/profil',             [PenggunaController::class,'profil'])->name('profil');
-    Route::post('/profil/update',     [PenggunaController::class,'updateProfil'])->name('profil.update');
-    Route::post('/profil/password',   [PenggunaController::class,'gantiPassword'])->name('profil.password');
+    Route::get('/ulp/{id}', [UlpController::class,'show'])->name('ulp.show');
 });
-
-// ULP detail (tambahan)
-Route::get('/ulp/{id}', [App\Http\Controllers\UlpController::class,'show'])->name('ulp.show')->middleware('auth');

@@ -126,9 +126,11 @@ h2{font-size:20px;font-weight:800;color:#0F172A;margin-bottom:4px}
 
     <div class="demo-box">
       <strong>🔑 Akun Demo</strong>
-      Admin &nbsp;&nbsp;: admin@pln.local / password123<br>
-      Manajer &nbsp;: manajer@pln.local / password123<br>
-      Supervisor: sup.teknik@pln.local / password123
+      Admin UP3 &nbsp;: admin.up3@pln.co.id / password<br>
+      Admin Manahan &nbsp;: admin.manahan@pln.co.id / password<br>
+      Admin Kartasuro: admin.kartasuro@pln.co.id / password<br>
+      Admin Palur &nbsp;&nbsp;: admin.palur@pln.co.id / password<br>
+      Admin Sragen &nbsp;: admin.sragen@pln.co.id / password
     </div>
 
     <div class="footer-note">

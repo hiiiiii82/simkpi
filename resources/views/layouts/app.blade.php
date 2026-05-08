@@ -121,7 +121,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#1E293B;margin:0}
     </a>
     @endforeach
 
-    @if(auth()->user()->isAdmin())
+    @if(auth()->user()->isAdminUp3())
     <div class="sb-sec">Kelola KPI</div>
     <a href="{{ route('kpi.index') }}" class="sb-link {{ request()->routeIs('kpi.*') ? 'active':'' }}">
       <i class="bi bi-list-check"></i> Indikator KPI
@@ -137,9 +137,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#1E293B;margin:0}
     @endif
 
     <div class="sb-sec">Kinerja</div>
+    @if(auth()->user()->isAdminUlp() || auth()->user()->isAdminUp3())
     <a href="{{ route('input.index') }}" class="sb-link {{ request()->routeIs('input.*') ? 'active':'' }}">
-      <i class="bi bi-pencil-square"></i> Input Data
+      <i class="bi bi-pencil-square"></i>
+      @if(auth()->user()->isAdminUlp()) Input KPI {{ auth()->user()->ulp?->nama ?? 'ULP' }}
+      @else Input Data KPI
+      @endif
     </a>
+    @endif
     <a href="{{ route('monitoring.index') }}" class="sb-link {{ request()->routeIs('monitoring.*') ? 'active':'' }}">
       <i class="bi bi-activity"></i> Monitoring Real-time
     </a>
@@ -152,10 +157,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:#1E293B;margin:0}
       <i class="bi bi-file-earmark-bar-graph-fill"></i> Laporan & Unduh
     </a>
 
-    @if(auth()->user()->isAdmin())
-    <div class="sb-sec">Admin</div>
+    @if(auth()->user()->isAdminUp3())
+    <div class="sb-sec">Admin UP3</div>
     <a href="{{ route('pengguna.index') }}" class="sb-link {{ request()->routeIs('pengguna.*') ? 'active':'' }}">
-      <i class="bi bi-people-fill"></i> Pengguna
+      <i class="bi bi-people-fill"></i> Kelola Pengguna
     </a>
     @endif
   </div>
