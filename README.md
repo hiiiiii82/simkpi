@@ -205,4 +205,4 @@ Restart Apache setelah mengubah `php.ini`.
 
 ---
 
-*Dibuat oleh: Mahasiswa Magang Informatika — PLN UP3 Surakarta, 2025*
+*Dibuat oleh: Chindy Aydatama Charolina — PLN UP3 Surakarta, 2025*
