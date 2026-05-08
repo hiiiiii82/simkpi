@@ -55,16 +55,6 @@ Buka browser: **http://localhost:8000**
 
 ---
 
-## 🔑 Akun Default
-
-| Role         | Email                    | Password     |
-|--------------|--------------------------|--------------|
-| Admin        | admin@pln.local          | password123  |
-| Manajer      | manajer@pln.local        | password123  |
-| Supervisor 1 | sup.teknik@pln.local     | password123  |
-| Supervisor 2 | sup.niaga@pln.local      | password123  |
-| Pegawai 1    | pegawai1@pln.local       | password123  |
-| Pegawai 2    | pegawai2@pln.local       | password123  |
 
 ---
 
